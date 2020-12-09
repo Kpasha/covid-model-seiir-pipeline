@@ -1,57 +1,8 @@
 data:
-  regression_version: '2020_12_07.07'
+  regression_version: '2020_12_03.02'
   covariate_version: '2020_12_01.05'
   output_root: ''
-workflow:
-  project: 'proj_covid'
-  queue: 'd.q'
-  tasks:
-    scaling:
-      max_runtime_seconds: 5000
-      m_mem_free: '5G'
-      num_cores: 26
-    forecast:
-      max_runtime_seconds: 15000
-      m_mem_free: '5G'
-      num_cores: 1
-    sentinel:
-      max_runtime_seconds: 1000
-      m_mem_free: '1G'
-      num_cores: 1
-    resample:
-      max_runtime_seconds: 5000
-      m_mem_free: '50G'
-      num_cores: 26
-    postprocess:
-      max_runtime_seconds: 15000
-      m_mem_free: '150G'
-      num_cores: 26
 scenarios:
-  worse:
-    algorithm: 'normal' # normal, draw_level_mandate_reimposition
-    solver: 'RK45'
-    system: 'vaccine'
-    system_params:
-        forecast_version: 'reference'
-        proportion_immune: 0.5
-    population_partition: 'high_and_low_risk'
-    beta_scaling:
-      window_size: 42
-      average_over_min: 7
-      average_over_max: 42
-      offset_deaths_lower: 150
-      offset_deaths_upper: 300
-    theta: '/ihme/covid-19/seir-parameters/2020_10_06.01/thetas.csv'
-    covariates:
-      pneumonia: 'reference'
-      mobility: 'reference'
-      mask_use: 'reference'
-      testing: 'reference'
-      air_pollution_pm_2_5: 'reference'
-      smoking_prevalence: 'reference'
-      lri_mortality: 'reference'
-      proportion_under_100m: 'reference'
-      proportion_over_2_5k: 'reference'
   reference:
     algorithm: 'draw_level_mandate_reimposition'
     algorithm_params:
@@ -89,6 +40,9 @@ scenarios:
       minimum_delay: 7 # days
     solver: 'RK45'
     system: 'normal'
+#    system_params:
+#        forecast_version: 'reference'
+#        proportion_immune: 0.5
     population_partition: 'high_and_low_risk'
     beta_scaling:
       window_size: 42
@@ -107,52 +61,23 @@ scenarios:
       lri_mortality: 'reference'
       proportion_under_100m: 'reference'
       proportion_over_2_5k: 'reference'
-  best_masks:
+  reference_optim:
     algorithm: 'draw_level_mandate_reimposition'
     algorithm_params:
       death_threshold: 8  # per million
       reimposition_duration: 6 # weeks
       minimum_delay: 7 # days
-    solver: 'RK45'
+    solver: 'RK45_optimized'
     system: 'vaccine'
     system_params:
         forecast_version: 'reference'
-        proportion_immune: 0.5
+        proportion_immune: 0.5  
     population_partition: 'high_and_low_risk'
     beta_scaling:
       window_size: 42
       average_over_min: 7
       average_over_max: 42
-      offset_deaths_lower: 150
-      offset_deaths_upper: 300
-    theta: '/ihme/covid-19/seir-parameters/2020_10_06.01/thetas.csv'
-    covariates:
-      pneumonia: 'reference'
-      mobility: 'reference'
-      mask_use: 'best'
-      testing: 'reference'
-      air_pollution_pm_2_5: 'reference'
-      smoking_prevalence: 'reference'
-      lri_mortality: 'reference'
-      proportion_under_100m: 'reference'
-      proportion_over_2_5k: 'reference'
-  vaccine_fast:
-    algorithm: 'draw_level_mandate_reimposition'
-    algorithm_params:
-      death_threshold: 8  # per million
-      reimposition_duration: 6 # weeks
-      minimum_delay: 7 # days
-    solver: 'RK45'
-    system: 'vaccine'
-    system_params:
-        forecast_version: 'fast_balanced'
-        proportion_immune: 0.5
-    population_partition: 'high_and_low_risk'
-    beta_scaling:
-      window_size: 42
-      average_over_min: 7
-      average_over_max: 42
-      offset_deaths_lower: 150
+      offset_deaths_lower: 150 
       offset_deaths_upper: 300
     theta: '/ihme/covid-19/seir-parameters/2020_10_06.01/thetas.csv'
     covariates:
@@ -165,17 +90,17 @@ scenarios:
       lri_mortality: 'reference'
       proportion_under_100m: 'reference'
       proportion_over_2_5k: 'reference'
-  vaccine_fast_elderly:
+  no_vaccine_optim:
     algorithm: 'draw_level_mandate_reimposition'
     algorithm_params:
       death_threshold: 8  # per million
       reimposition_duration: 6 # weeks
       minimum_delay: 7 # days
-    solver: 'RK45'
-    system: 'vaccine'
-    system_params:
-        forecast_version: 'fast_elderly'
-        proportion_immune: 0.5
+    solver: 'RK45_optimized'
+    system: 'normal'
+#    system_params:
+#        forecast_version: 'reference'
+#        proportion_immune: 0.5
     population_partition: 'high_and_low_risk'
     beta_scaling:
       window_size: 42
@@ -196,6 +121,6 @@ scenarios:
       proportion_over_2_5k: 'reference'
 postprocessing:
   resampling:
-    reference_scenario: 'worse'
+    reference_scenario: 'reference'
     lower_quantile: 0.025
     upper_quantile: 0.975

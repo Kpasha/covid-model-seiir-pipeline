@@ -20,6 +20,7 @@ if __name__ == "__main__":
         'h5py',
         'loguru',
         'matplotlib',
+        'numba',
         'numpy',
         'pandas',
         'pyyaml',
@@ -36,7 +37,7 @@ if __name__ == "__main__":
     doc_requirements = []
 
     internal_requirements = [
-        'jobmon',
+        'jobmon<2.0',
         'db_queries',
     ]
 
