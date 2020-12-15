@@ -24,13 +24,15 @@ class ForecastDataInterface:
                  regression_paths: paths.RegressionPaths,
                  covariate_paths: paths.CovariatePaths,
                  regression_marshall,
-                 forecast_marshall):
+                 forecast_marshall,
+                 fh_subnationals: bool):
         # TODO: only hang on to marshalls here.
         self.forecast_paths = forecast_paths
         self.regression_paths = regression_paths
         self.covariate_paths = covariate_paths
         self.regression_marshall = regression_marshall
         self.forecast_marshall = forecast_marshall
+        self.fh_subnationals = fh_subnationals
 
     @classmethod
     def from_specification(cls, specification: ForecastSpecification) -> 'ForecastDataInterface':
@@ -49,6 +51,7 @@ class ForecastDataInterface:
             covariate_paths=covariate_paths,
             regression_marshall=regression_marshall,
             forecast_marshall=forecast_marshall,
+            fh_subnationals=specification.data.fh_subnationals,
         )
 
     def make_dirs(self):
@@ -119,7 +122,10 @@ class ForecastDataInterface:
         metadata = self.get_infectionator_metadata()
         # TODO: metadata abstraction?
         model_inputs_version = metadata['death']['metadata']['model_inputs_metadata']['output_path']
-        full_data_path = Path(model_inputs_version) / 'full_data.csv'
+        if self.fh_subnationals:
+            full_data_path = Path(model_inputs_version) / 'full_data_fh_subnationals.csv'
+        else:
+            full_data_path = Path(model_inputs_version) / 'full_data.csv'
         full_data = pd.read_csv(full_data_path)
         full_data['date'] = pd.to_datetime(full_data['Date'])
         full_data = full_data.drop(columns=['Date'])
