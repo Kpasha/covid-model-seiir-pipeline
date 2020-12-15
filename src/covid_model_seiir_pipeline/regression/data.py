@@ -23,16 +23,19 @@ class RegressionDataInterface:
                  infection_paths: paths.InfectionPaths,
                  covariate_paths: paths.CovariatePaths,
                  regression_marshall,
+                 old_regression_marshall,
                  ):
         # TODO: only hang on to marshalls here.
         self.regression_paths = regression_paths
         self.infection_paths = infection_paths
         self.covariate_paths = covariate_paths
         self.regression_marshall = regression_marshall
+        self.old_regression_marshall = old_regression_marshall
 
     @classmethod
     def from_specification(cls, specification: RegressionSpecification) -> 'RegressionDataInterface':
         regression_paths = paths.RegressionPaths(Path(specification.data.output_root), read_only=False)
+        old_regression_paths = paths.RegressionPaths(Path(specification.data.coefficient_version))
         infection_paths = paths.InfectionPaths(Path(specification.data.infection_version))
         covariate_paths = paths.CovariatePaths(Path(specification.data.covariate_version))
         # TODO: specification of marshall type from inference on inputs and
@@ -42,10 +45,14 @@ class RegressionDataInterface:
             infection_paths=infection_paths,
             covariate_paths=covariate_paths,
             regression_marshall=CSVMarshall.from_paths(regression_paths),
+            old_regression_marshall=CSVMarshall.from_paths(old_regression_paths),
         )
 
     def make_dirs(self):
         self.regression_paths.make_dirs()
+
+    def load_prior_run_coefficients(self, draw_id: int):
+        self.old_regression_marshall.load(key=MKeys.coefficient(draw_id=draw_id))
 
     #####################
     # Location handling #
