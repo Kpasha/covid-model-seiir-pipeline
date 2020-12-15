@@ -31,7 +31,7 @@ def seiir():
               type=click.Path(file_okay=False),
               help=('Which version of the covariates to use in the '
                     'regression.'))
-@click.option('--coefficients-version',
+@click.option('--coefficient-version',
               type=click.Path(file_okay=False),
               help='A prior regression version for pinning the regression '
                    'coefficients. If provided, all fixed effects from the '
