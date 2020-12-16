@@ -197,7 +197,7 @@ MISCELLANEOUS = {
 def postprocess_measure(data_interface: ForecastDataInterface,
                         resampling_map: Dict[int, Dict[str, List[int]]],
                         scenario_name: str, measure: str,
-                        num_cores: int) -> None:
+                        num_cores: int, aggregate: bool) -> None:
     measure_config = MEASURES[measure]
     logger.info(f'Loading {measure}.')
     measure_data = measure_config.loader(scenario_name, data_interface, num_cores)
@@ -207,7 +207,7 @@ def postprocess_measure(data_interface: ForecastDataInterface,
     logger.info(f'Resampling {measure}.')
     measure_data = pp.resample_draws(measure_data, resampling_map)
 
-    if measure_config.aggregator is not None:
+    if measure_config.aggregator is not None and aggregate:
         hierarchy = pp.load_modeled_hierarchy(data_interface)
         population = pp.load_populations(data_interface)
         measure_data = measure_config.aggregator(measure_data, hierarchy, population)
@@ -231,7 +231,7 @@ def postprocess_covariate(data_interface: ForecastDataInterface,
                           resampling_map: Dict[int, Dict[str, List[int]]],
                           scenario_spec: ScenarioSpecification,
                           scenario_name: str, covariate: str,
-                          num_cores: int) -> None:
+                          num_cores: int, aggregate: bool) -> None:
     covariate_config = COVARIATES[covariate]
     logger.info(f'Loading {covariate}.')
     covariate_data = covariate_config.loader(covariate, covariate_config.time_varying,
@@ -240,7 +240,7 @@ def postprocess_covariate(data_interface: ForecastDataInterface,
     covariate_data = pd.concat(covariate_data, axis=1)
     covariate_data = pp.resample_draws(covariate_data, resampling_map)
 
-    if covariate_config.aggregator is not None:
+    if covariate_config.aggregator is not None and aggregate:
         hierarchy = pp.load_modeled_hierarchy(data_interface)
         population = pp.load_populations(data_interface)
         covariate_data = covariate_config.aggregator(covariate_data, hierarchy, population)
@@ -277,12 +277,12 @@ def postprocess_covariate(data_interface: ForecastDataInterface,
 
 def postprocess_miscellaneous(data_interface: ForecastDataInterface,
                               scenario_name: str, measure: str,
-                              num_cores: int):
+                              num_cores: int, aggregate: bool):
     miscellaneous_config = MISCELLANEOUS[measure]
     logger.info(f'Loading {measure}.')
     miscellaneous_data = miscellaneous_config.loader(data_interface)
 
-    if miscellaneous_config.aggregator is not None:
+    if miscellaneous_config.aggregator is not None and aggregate:
         hierarchy = pp.load_modeled_hierarchy(data_interface)
         population = pp.load_populations(data_interface)
         miscellaneous_data = miscellaneous_config.aggregator(miscellaneous_data, hierarchy, population)
@@ -308,13 +308,15 @@ def run_seir_postprocessing(forecast_version: str, scenario_name: str, measure: 
     data_interface = ForecastDataInterface.from_specification(forecast_spec)
     resampling_map = data_interface.load_resampling_map()
     num_cores = forecast_spec.workflow.task_specifications[FORECAST_JOBS.postprocess].num_cores
+    aggregate = forecast_spec.postprocessing.aggregate
 
     if measure in MEASURES:
-        postprocess_measure(data_interface, resampling_map, scenario_name, measure, num_cores)
+        postprocess_measure(data_interface, resampling_map, scenario_name, measure, num_cores, aggregate)
     elif measure in COVARIATES:
-        postprocess_covariate(data_interface, resampling_map, scenario_spec, scenario_name, measure, num_cores)
+        postprocess_covariate(data_interface, resampling_map, scenario_spec, scenario_name,
+                              measure, num_cores, aggregate)
     elif measure in MISCELLANEOUS:
-        postprocess_miscellaneous(data_interface, scenario_name, measure, num_cores)
+        postprocess_miscellaneous(data_interface, scenario_name, measure, num_cores, aggregate)
     else:
         raise NotImplementedError(f'Unknown measure {measure}.')
 

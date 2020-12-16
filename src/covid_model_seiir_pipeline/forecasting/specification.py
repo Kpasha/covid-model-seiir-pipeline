@@ -161,6 +161,7 @@ class ScenarioSpecification:
 class PostprocessingSpecification:
 
     resampling: Dict = field(default_factory=dict)
+    aggregate: bool = field(default=True)
 
     def to_dict(self) -> Dict:
         return asdict(self)
