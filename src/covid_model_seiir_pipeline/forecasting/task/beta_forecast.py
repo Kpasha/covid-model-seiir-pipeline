@@ -82,7 +82,6 @@ def run_beta_forecast(draw_id: int, forecast_version: str, scenario_name: str, *
 
     # Load any data specific to the particular scenario we're running
     scenario_data = data_interface.load_scenario_specific_data(location_ids, scenario_spec)
-
     # Modeling starts
     logger.info('Forecasting beta and components.')
     betas = model.forecast_beta(covariate_pred, coefficients, beta_scales)

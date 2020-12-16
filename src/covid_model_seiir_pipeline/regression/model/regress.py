@@ -114,7 +114,7 @@ def build_regressor(covariates: Iterable[CovariateSpecification],
         cov_model = CovariateModel.from_specification(covariate)
 
         if prior_coefficients is not None and not cov_model.use_re:
-            coefficient_val = prior_coefficients[covariate].mean()
+            coefficient_val = prior_coefficients[covariate.name].mean()
             cov_model.gprior = np.array([coefficient_val, 1e-10])
 
         covariate_models[covariate.order].append(cov_model)

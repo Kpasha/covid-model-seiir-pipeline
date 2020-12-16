@@ -160,7 +160,7 @@ def run_normal_ode_model_by_location(initial_condition: pd.DataFrame,
 
         # FIXME: Temporary hack so I don't have to muck with specifications.
         runner_class = {
-            'RK45': _ODERunner,
+            'RK45': _ODERunnerOptimized,
             'RK45_optimized': _ODERunnerOptimized
         }[scenario_spec.solver]
 

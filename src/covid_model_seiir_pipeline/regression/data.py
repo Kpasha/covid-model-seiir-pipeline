@@ -52,7 +52,7 @@ class RegressionDataInterface:
         self.regression_paths.make_dirs()
 
     def load_prior_run_coefficients(self, draw_id: int):
-        self.old_regression_marshall.load(key=MKeys.coefficient(draw_id=draw_id))
+        return self.old_regression_marshall.load(key=MKeys.coefficient(draw_id=draw_id))
 
     #####################
     # Location handling #
