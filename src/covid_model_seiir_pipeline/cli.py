@@ -33,6 +33,12 @@ def seiir():
               type=click.Path(file_okay=False),
               help=('Which version of the covariates to use in the '
                     'regression.'))
+@click.option('--coefficient-version',
+              type=click.Path(file_okay=False),
+              help='A prior regression version for pinning the regression '
+                   'coefficients. If provided, all fixed effects from the '
+                   'provided version will be used and only random effects will '
+                   'be fit.')
 @click.option('-l', '--location-specification',
               type=click.STRING,
               help="Either a location set version id used to pull a list of"
@@ -47,7 +53,7 @@ def seiir():
 @cli_tools.add_verbose_and_with_debugger
 def regress(run_metadata,
             regression_specification,
-            infection_version, covariates_version,
+            infection_version, covariates_version, coefficient_version,
             location_specification,
             preprocess_only,
             output_root, mark_best, production_tag,
@@ -65,6 +71,9 @@ def regress(run_metadata,
     covariates_root = utilities.get_input_root(covariates_version,
                                                regression_spec.data.covariate_version,
                                                paths.SEIR_COVARIATES_OUTPUT_ROOT)
+    coefficient_root = utilities.get_input_root(coefficient_version,
+                                                regression_spec.data.coefficient_version,
+                                                paths.SEIR_REGRESSION_OUTPUTS)
     locations_set_version_id, location_set_file = utilities.get_location_metadata(
         location_specification,
         regression_spec.data.location_set_version_id,
@@ -78,6 +87,7 @@ def regress(run_metadata,
     # and dump to disk.
     regression_spec.data.infection_version = str(infection_root)
     regression_spec.data.covariate_version = str(covariates_root)
+    regression_spec.data.coefficient_version = str(coefficient_root)
     regression_spec.data.location_set_version_id = locations_set_version_id
     regression_spec.data.location_set_file = location_set_file
     regression_spec.data.output_root = str(run_directory)

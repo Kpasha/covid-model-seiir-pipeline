@@ -5,7 +5,7 @@ from typing import Dict, List, Iterable, Optional, Union
 from loguru import logger
 import pandas as pd
 
-from covid_model_seiir_pipeline import io, utilities
+from covid_model_seiir_pipeline import io, utilities, static_vars
 from covid_model_seiir_pipeline.regression.specification import RegressionSpecification
 
 
@@ -138,6 +138,13 @@ class RegressionDataInterface:
         covariate_data = reduce(lambda x, y: x.merge(y, left_index=True, right_index=True), covariate_data)
         return covariate_data.reset_index()
 
+    def load_regression_coefficients(self, draw_id: int) -> pd.DataFrame:
+        return io.load(self.regression_root.coefficients(draw_id=draw_id))
+
+    def load_prior_run_coefficients(self, version: str, draw_id: int):
+        previous_di = self._get_previous_version_data_interface(version)
+        return previous_di.load_regression_coefficients(draw_id)
+
     ############################
     # Regression paths writers #
     ############################
@@ -166,3 +173,13 @@ class RegressionDataInterface:
     def save_location_data(self, df: pd.DataFrame, draw_id: int) -> None:
         # quasi-inverse of load_all_location_data, except types are different
         io.dump(df, self.regression_root.data(draw_id=draw_id))
+
+    #########################
+    # Non-interface methods #
+    #########################
+
+    def _get_previous_version_data_interface(self, version: str) -> 'RegressionDataInterface':
+        previous_spec_path = Path(version) / static_vars.REGRESSION_SPECIFICATION_FILE
+        previous_spec = RegressionSpecification.from_path(previous_spec_path)
+        previous_di = RegressionDataInterface.from_specification(previous_spec)
+        return previous_di

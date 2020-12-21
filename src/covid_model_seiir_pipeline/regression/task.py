@@ -27,6 +27,10 @@ def run_beta_regression(draw_id: int, regression_version: str) -> None:
     location_data = data_interface.load_all_location_data(location_ids=location_ids,
                                                           draw_id=draw_id)
     covariates = data_interface.load_covariates(regression_specification.covariates, location_ids)
+    if regression_specification.data.coefficient_version:
+        prior_coefficients = data_interface.load_prior_run_coefficients(draw_id=draw_id)
+    else:
+        prior_coefficients = None
 
     # Run ODE fit
     np.random.seed(draw_id)
@@ -51,6 +55,7 @@ def run_beta_regression(draw_id: int, regression_version: str) -> None:
 
     # Run regression
     mr_data = model.align_beta_with_covariates(covariates, beta_fit, list(regression_specification.covariates))
+    regressor = model.build_regressor(regression_specification.covariates.values(), prior_coefficients)
     regressor = model.build_regressor(regression_specification.covariates.values())
     coefficients = regressor.fit(mr_data)
     log_beta_hat = compute_beta_hat(covariates, coefficients)
