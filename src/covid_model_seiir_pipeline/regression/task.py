@@ -28,7 +28,9 @@ def run_beta_regression(draw_id: int, regression_version: str) -> None:
                                                           draw_id=draw_id)
     covariates = data_interface.load_covariates(regression_specification.covariates, location_ids)
     if regression_specification.data.coefficient_version:
-        prior_coefficients = data_interface.load_prior_run_coefficients(draw_id=draw_id)
+        prior_coefficients = data_interface.load_prior_run_coefficients(
+            regression_specification.data.coefficient_version, draw_id=draw_id
+        )
     else:
         prior_coefficients = None
 
