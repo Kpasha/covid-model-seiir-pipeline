@@ -1,8 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, NamedTuple, Tuple
 
-import pandas as pd
-
 from covid_model_seiir_pipeline.utilities import (
     Specification,
     asdict,
@@ -98,7 +96,7 @@ class PostprocessingSpecification(Specification):
                  workflow: PostprocessingWorkflowSpecification,
                  resampling: ResamplingSpecification,
                  splicing: List[SplicingSpecification],
-                 aggregation: AggregationSpecification):
+                 aggregation: List[AggregationSpecification]):
         self._data = data
         self._workflow = workflow
         self._resampling = resampling
@@ -113,7 +111,8 @@ class PostprocessingSpecification(Specification):
         resampling = ResamplingSpecification(**postprocessing_spec_dict.get('resampling', {}))
         splicing_configs = postprocessing_spec_dict.get('splicing', [])
         splicing = [SplicingSpecification(**splicing_config) for splicing_config in splicing_configs]
-        aggregation = AggregationSpecification(**postprocessing_spec_dict.get('aggregation', {}))
+        aggregation_configs = postprocessing_spec_dict.get('aggregation', [])
+        aggregation = [AggregationSpecification(**aggregation_config) for aggregation_config in aggregation_configs]
         return data, workflow, resampling, splicing, aggregation
 
     @property
@@ -134,7 +133,7 @@ class PostprocessingSpecification(Specification):
         return self._splicing
 
     @property
-    def aggregation(self) -> AggregationSpecification:
+    def aggregation(self) -> List[AggregationSpecification]:
         return self._aggregation
 
     def to_dict(self):
@@ -144,5 +143,5 @@ class PostprocessingSpecification(Specification):
             'workflow': self.workflow.to_dict(),
             'resampling': self.resampling.to_dict(),
             'splicing': [splicing_config.to_dict() for splicing_config in self.splicing],
-            'aggregation': self.aggregation.to_dict()
+            'aggregation': [aggregation_config.to_dict() for aggregation_config in self.aggregation],
         }
