@@ -85,7 +85,8 @@ def run_beta_forecast(draw_id: int, forecast_version: str, scenario_name: str, *
 
     # Modeling starts
     logger.info('Forecasting beta and components.')
-    betas = model.forecast_beta(covariate_pred, coefficients, beta_scales)
+    betas = model.forecast_beta(covariate_pred, coefficients, beta_scales,
+                                scenario_spec.algorithm_params['beta_percent_reduction'])
     seir_parameters = model.prep_seir_parameters(betas, thetas, scenario_data)
     _ode_start = time.time()
     future_components = model.run_normal_ode_model_by_location(
@@ -151,7 +152,8 @@ def run_beta_forecast(draw_id: int, forecast_version: str, scenario_name: str, *
             covariate_pred = covariates.loc[the_future].reset_index()
 
             logger.info('Forecasting beta and components.')
-            betas = model.forecast_beta(covariate_pred, coefficients, beta_scales)
+            betas = model.forecast_beta(covariate_pred, coefficients, beta_scales,
+                                        scenario_spec.algorithm_params['beta_percent_reduction'])
             seir_parameters = model.prep_seir_parameters(betas, thetas, scenario_data)
 
             # The ode is done as a loop over the locations in the initial condition.

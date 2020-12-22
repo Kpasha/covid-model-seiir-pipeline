@@ -14,7 +14,8 @@ from covid_model_seiir_pipeline.forecasting.specification import ScenarioSpecifi
 
 def forecast_beta(covariates: pd.DataFrame,
                   coefficients: pd.DataFrame,
-                  beta_shift_parameters: pd.DataFrame) -> pd.DataFrame:
+                  beta_shift_parameters: pd.DataFrame,
+                  beta_percent_reduction: float) -> pd.DataFrame:
     log_beta_hat = compute_beta_hat(covariates, coefficients)
     beta_hat = np.exp(log_beta_hat).rename('beta_pred').reset_index()
 
